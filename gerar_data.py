@@ -7,7 +7,7 @@ USO:
 
 Requer na mesma pasta:
     members-report.csv  /  usuarios.csv  /  clientes.csv
-    report.csv          ← relatório de consumo (aulas assistidas)
+    consumo.csv          ← relatório de consumo (aulas assistidas)
     index.html
 """
 import pandas as pd, re, json
@@ -20,7 +20,7 @@ GENERIC = {'Aplicativo','Full Pass','Pré-vendas','Gestão','Executivos','Canais
 members  = pd.read_csv(BASE/'members-report.csv')
 usuarios = pd.read_csv(BASE/'usuarios.csv')
 clientes = pd.read_csv(BASE/'clientes.csv')
-report   = pd.read_csv(BASE/'report.csv')
+report   = pd.read_csv(BASE/'consumo.csv')
 
 members['email_lower']  = members['Email'].str.lower().str.strip()
 usuarios['email_lower'] = usuarios['Url do E-mail do Membro'].str.lower().str.strip()
