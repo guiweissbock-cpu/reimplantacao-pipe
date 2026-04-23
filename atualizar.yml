@@ -1,0 +1,40 @@
+name: Atualizar Dashboard
+
+on:
+  push:
+    paths:
+      - 'members-report.csv'
+      - 'usuarios.csv'
+      - 'clientes.csv'
+      - 'consumo.csv'
+  workflow_dispatch:   # ← permite disparar manualmente pela aba Actions
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install pandas
+
+      - name: Gerar index.html
+        run: python gerar_data.py
+
+      - name: Commitar index.html atualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "auto: atualiza dashboard $(date +'%d/%m/%Y %H:%M')"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
