@@ -11,7 +11,7 @@ Requer na mesma pasta:
     index.html
 """
 
-import pandas as pd, re, json
+import pandas as pd, re, json, unicodedata
 from pathlib import Path
 
 BASE = Path(__file__).parent
@@ -44,16 +44,58 @@ report['email_lower']   = report['Email'].str.lower().str.strip()
 
 usu_dedup = usuarios[['email_lower','Nome da Empresa']].drop_duplicates('email_lower')
 
+# ── NORMALIZAÇÃO PARA CORRESPONDÊNCIA DE NOMES ──────────────
+def normalizar(s):
+    """Remove acentos, espaços e caracteres especiais → string alfanumérica minúscula."""
+    s = unicodedata.normalize('NFKD', str(s)).encode('ascii', 'ignore').decode()
+    return re.sub(r'[^a-z0-9]', '', s.lower())
+
+# ── EMPRESAS ATIVAS: apenas Status == 'Ativo' ───────────────
+# Regra:
+#   1. Se empresa tiver QUALQUER linha Ativo → inclui (mesmo que tenha Inativo)
+#   2. Se empresa existir APENAS como Churn/Inativo → exclui
+#   3. Se não encontrada no clientes.csv → inclui (benefício da dúvida)
+# Correspondência: exata (lower) → normalizada → substring normalizada (≥6 chars)
+
+clientes_ativos = clientes[clientes['Status'] == 'Ativo'].copy()
+
+empresas_ativas_set = set(clientes_ativos['Empresa'].str.strip().str.lower().dropna())
+todas_no_clientes   = set(clientes['Empresa'].str.strip().str.lower().dropna())
+excluir_exato       = todas_no_clientes - empresas_ativas_set
+
+norm_ativas  = {normalizar(e): e for e in empresas_ativas_set}
+norm_excluir = {normalizar(e): e for e in excluir_exato}
+
 company_csm = {}
-for _, r in clientes[['Empresa','CSM']].dropna(subset=['Empresa']).iterrows():
+for _, r in clientes_ativos[['Empresa','CSM']].dropna(subset=['Empresa']).iterrows():
     company_csm[r['Empresa'].strip().lower()] = r['CSM']
+norm_csm = {normalizar(k): v for k, v in company_csm.items()}
+
+def is_empresa_ativa(nome):
+    """Inclui empresa se ela for Ativo ou não encontrada. Exclui se só tiver Churn/Inativo."""
+    if pd.isna(nome) or str(nome).strip() == '': return True
+    nl  = str(nome).strip().lower()
+    nnl = normalizar(nome)
+    if nl  in empresas_ativas_set: return True   # exato → ativa
+    if nl  in excluir_exato:       return False  # exato → excluir
+    if nnl in norm_ativas:         return True   # normalizado → ativa
+    if nnl in norm_excluir:        return False  # normalizado → excluir
+    # substring normalizada: nome do clientes contido no nome da turma
+    for nc in norm_ativas:
+        if len(nc) >= 6 and nc in nnl: return True
+    for nc in norm_excluir:
+        if len(nc) >= 6 and nc in nnl: return False
+    return True  # não encontrado → inclui
 
 def get_csm(name):
-    if pd.isna(name) or str(name).strip()=='': return ''
-    nl = str(name).strip().lower()
-    if nl in company_csm: return str(company_csm[nl])
-    for k,v in company_csm.items():
-        if nl in k or k in nl: return str(v)
+    if pd.isna(name) or str(name).strip() == '': return ''
+    nl  = str(name).strip().lower()
+    nnl = normalizar(name)
+    if nl  in company_csm: return str(company_csm[nl])
+    if nnl in norm_csm:    return str(norm_csm[nnl])
+    for k, v in company_csm.items():
+        nk = normalizar(k)
+        if len(nk) >= 6 and (nk in nnl or nnl in nk): return str(v)
     return ''
 
 def extract_companies(turma):
@@ -105,9 +147,15 @@ members['CSM'] = members['empresa_turma'].apply(get_csm)
 mask = members['CSM']==''
 members.loc[mask,'CSM'] = members.loc[mask,'empresa_final'].apply(get_csm)
 
-reimpl     = members[members['reimplantado']].copy()
+reimpl_all = members[members['reimplantado']].copy()
+
+# Filtra apenas empresas com Status == Ativo no clientes.csv
+reimpl_all['empresa_ativa'] = reimpl_all['empresa_final'].apply(is_empresa_ativa)
+reimpl     = reimpl_all[reimpl_all['empresa_ativa']].copy()
 nao_reimpl = members[~members['reimplantado']].copy()
 nao_enc    = members[~members['email_lower'].isin(usu_dedup['email_lower'])].copy()
+
+print(f"  🔍 Filtro status: {len(reimpl_all)} reimplantados totais → {len(reimpl)} de empresas ativas ({len(reimpl_all)-len(reimpl)} excluídos por Churn/Inativo)")
 
 empresas_reimpl = sorted(set(e for lst in reimpl['empresas_lista'] for e in lst))
 total_r = len(reimpl); acessaram = int(reimpl['acessou'].sum())
@@ -150,6 +198,10 @@ rp['empresa_final'] = rp.apply(lambda row:
 rp['empresa_final'] = rp['empresa_final'].str.replace(r'^[Cc]artrom$','CARTROM',regex=True)
 rp['CSM'] = rp['empresa_final'].apply(get_csm)
 rp.loc[(rp['CSM']=='') & rp['is_internal'],'CSM'] = 'Gunther Weissbock'
+
+# Filtra aulas apenas de empresas ativas
+rp['empresa_ativa'] = rp['empresa_final'].apply(is_empresa_ativa)
+rp = rp[rp['empresa_ativa'] | rp['is_internal']].copy()
 
 rp['data_compra_dt'] = pd.to_datetime(rp['Data da compra'], format='%d/%m/%Y', errors='coerce')
 rp['mes'] = rp['data_compra_dt'].dt.strftime('%Y-%m').fillna('')
