@@ -1,4 +1,4 @@
-fast,Grupo,Segmento,Qtde Total de Membros, Status,CSM,"Data de Assinatura
+Empresa,Grupo,Segmento,Qtde Total de Membros, Status,CSM,"Data de Assinatura
 (DD/MM/AAAA)",Data de Primeira Renovação (DD/MM/AAAA),Plano Compromisso do Cliente,Plano / Faturamento,"Data de Vec. do Contrato
 (DD/MM/AAAA)",Data de Churn,LTV (MESES),CUPOM DE DESCONTO,Meio de Pagamento,Valor Bruto 2024,Valor Bruto 2025,Valor mensal Liq (competência) 2025,"Valor Mensal Líq. 
 (competência)","Valor Líquido 
@@ -1117,4 +1117,6 @@ Brasmo Industria e Comércio,PipeLovers 20 para Empresas,B2B,20,Ativo,Priscila B
 WR Automação,PipeLovers 3 para Empresas,B2B,3,Ativo,Nicoly,30/6/26,29/7/26,Mensal,Mensal,29/7/26,,1,,Faturamento Manual,$599.00,$599.00,$599.00,$599.00,$199.67,,,$599.00,Boleto - Assas,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 Captei,PipeLovers 15 para Empresas,B2B,15,Ativo,Priscila Banzato,30/6/26,29/7/26,Mensal,Mensal,29/7/26,,1,,Faturamento Manual,"$1,979.00","$1,979.00","$1,979.00","$1,979.00",$131.93,,,"$1,979.00",Boleto - Assas,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 WebRota,PipeLovers 30 para Empresas,B2B,30,Ativo,Priscila Banzato,30/6/26,29/7/26,Mensal,Mensal,29/7/26,,1,,Faturamento Manual,"$3,579.00","$3,579.00","$3,579.00","$3,579.00",$119.30,,,"$3,579.00",Boleto - Assas,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Itera,PipeLovers 3 para Empresas,B2B,3,Ativo,Gabriela Timm,30/6/26,29/7/26,Mensal,Mensal,29/7/26,,1,,Hubla,$599.00,$599.00,$599.00,$599.00,$199.67,,,$599.00,alessandra.freitas@itera.com.br,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Bivox,PipeLovers 3 para Empresas,B2B,3,Ativo,Gabriela Timm,30/6/26,29/7/26,Mensal,Mensal,29/7/26,,1,,Hubla,$599.00,$599.00,$599.00,$599.00,$199.67,,,$599.00,iago.luizpereira7@gmail.com,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 Thomson Reuters,PipeLovers 30 para Empresas,B2B,30,Ativo,Priscila Banzato,1/7/26,1/8/26,Mensal,Mensal,1/8/26,,0,,Faturamento Manual,"$3,579.00","$3,579.00","$3,579.00","$3,579.00",$119.30,,,$0.00,Asaas - Cartão,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
